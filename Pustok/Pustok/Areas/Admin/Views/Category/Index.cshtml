@@ -59,7 +59,7 @@
                                             <td>
                                                 <a asp-controller="category" asp-action="update" asp-route-id="@category.Id" class="mr-2"><i class="las la-pen text-secondary font-18"></i></a>
 
-                                                <button onclick="return confirm('Are you sure to delete?')" class="mr-2" form="remove-form-@category.Id"><i class="las la-trash-alt text-danger font-22"></i></button>
+                                                <button class="remove-button" data-category-id="@category.Id" form="remove-form-@category.Id"><i class="las la-trash-alt text-danger font-22"></i></button>
                                                 <form asp-controller="category" asp-action="delete" asp-route-id="@category.Id" method="POST" class="d-none" id="remove-form-@category.Id">
                                                     <input type="hidden" name="id" value="@category.Id">
                                                 </form>
@@ -157,12 +157,43 @@
                     },
                     error: function (response) {
                         
-                       
-                        alert(response.message);
+                         
+                        response.message;
                     }
                 });
             });
         });
+
+        
+        $(document).ready(function () {
+            $(".remove-button").on("click", function () {
+                const categoryId = $(this).data("category-id");
+                const row = $(this).closest("tr");
+
+                if (confirm('Are you sure to delete?')) {
+                    $.ajax({
+                        url: "/admin/categories/delete/" + categoryId,
+                        type: "DELETE",
+                        dataType: "json",
+                        success: function (response) {
+                            if (response.success) {
+                                row.remove();
+                                alert("Message: " + response.message);
+                            } else {
+                                alert("Error: " + response.message);
+                            }
+                        },
+                        error: function (response) {
+                            alert("Error: " + response.message);
+                        }
+                    });
+                }
+            });
+        });
+
+
+
+
     </script>
 
     

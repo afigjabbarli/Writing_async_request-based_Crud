@@ -52,18 +52,21 @@ public class CategoryController : Controller
         try
         {
             if (!ModelState.IsValid)
-                return Json(new { success = false, message = "Validation failed!Please enter valid parametrs..." });
+            {
+                
+                return BadRequest(new { success = false, message = "Validation failed! Please enter valid parameters..." });
+            }
 
             var category = new Category
             {
                 Name = model.Name,
-                Description = model.CategoryDescription
-               
+                Description = model.CategoryDescription,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             _dbContext.Categories.Add(category);
             await _dbContext.SaveChangesAsync();
-
 
             var response = new
             {
@@ -73,16 +76,16 @@ public class CategoryController : Controller
                 name = category.Name,
                 description = category.Description
             };
+
            
             return Created("api/categories/" + category.Id, response);
-
         }
         catch (Exception ex)
         {
-          
-            return Json(new { success = false, message = "An error occurred while adding the category. Mistake:" + ex.Message });
+            
+            
+            return StatusCode(500, new { success = false, message = "An error occurred while adding the category. Mistake: " + ex.Message });
         }
-        
     }
 
 
@@ -130,7 +133,7 @@ public class CategoryController : Controller
 
     #region Delete
 
-    [HttpPost("{id}/delete")]
+    [HttpDelete("/admin/categories/delete/{id}")]
     public IActionResult Delete(int id)
     {
         var category = _dbContext.Categories.FirstOrDefault(c => c.Id == id);
@@ -138,8 +141,8 @@ public class CategoryController : Controller
 
         _dbContext.Categories.Remove(category);
         _dbContext.SaveChanges();
-
-        return RedirectToAction(nameof(Index));
+        return StatusCode(204, new { succes = true, message = "Category successfully deleted..." });
+        
     }
 
     #endregion
